@@ -111,7 +111,7 @@ services:
     volumes:
       - ./data:/app/data
     ports:
-      - "6080:6080"
+      - "8080:8080"
     restart: unless-stopped
 EOF
     echo "docker-compose.yml 文件已创建"
