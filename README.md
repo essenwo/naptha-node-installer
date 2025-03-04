@@ -1,0 +1,1 @@
+# naptha-node-installer
