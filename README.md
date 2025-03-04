@@ -19,5 +19,7 @@
 ### 方式 1：直接下载并运行
 1. 下载脚本：
    wget https://raw.githubusercontent.com/essenwo/naptha-node-installer/main/install-naptha-node.sh
+
    chmod +x install-naptha-node.sh
+
    ./install-naptha-node.sh
