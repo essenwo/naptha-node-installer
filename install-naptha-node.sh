@@ -1,10 +1,6 @@
 #!/bin/bash
 
 # Naptha 节点一键部署脚本
-# 功能：安装 Docker，克隆 Naptha 仓库，配置环境并启动节点
-# 作者：Grok 3 (xAI)
-# 日期：2025-03-05
-
 # Naptha 安装目录
 INSTALL_PATH="$HOME/naptha-node"
 
