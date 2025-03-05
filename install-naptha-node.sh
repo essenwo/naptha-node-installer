@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# Naptha 节点一键部署脚本
 # Naptha 安装目录
 INSTALL_PATH="$HOME/naptha-node"
 
@@ -67,17 +65,25 @@ configure_env() {
     echo "设置环境变量..."
     if [ -f ".env.example" ]; then
         cp .env.example .env
-        sed -i 's/^LAUNCH_DOCKER=.*/LAUNCH_DOCKER=true/' .env
-        sed -i 's/^LLM_BACKEND=.*/LLM_BACKEND=ollama/' .env
-        # 设置默认用户
-        if ! grep -q "^youruser=" .env; then
-            echo "youruser=root" >> .env
-        fi
-        echo "环境变量设置完成。"
     else
-        echo "未找到 .env.example 文件，请检查 Naptha 仓库！"
-        exit 1
+        echo "未找到 .env.example 文件，手动创建 .env 文件..."
+        cat > .env <<EOF
+LAUNCH_DOCKER=true
+LLM_BACKEND=ollama
+youruser=root
+EOF
     fi
+    # 确保必要的变量存在
+    if ! grep -q "^LAUNCH_DOCKER=" .env; then
+        echo "LAUNCH_DOCKER=true" >> .env
+    fi
+    if ! grep -q "^LLM_BACKEND=" .env; then
+        echo "LLM_BACKEND=ollama" >> .env
+    fi
+    if ! grep -q "^youruser=" .env; then
+        echo "youruser=root" >> .env
+    fi
+    echo "环境变量设置完成。"
 }
 
 # 启动 Naptha 服务
