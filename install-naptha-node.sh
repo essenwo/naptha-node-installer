@@ -8,6 +8,23 @@
 # Naptha 安装目录
 INSTALL_PATH="$HOME/naptha-node"
 
+# 检查并安装 Python 依赖
+prepare_python_env() {
+    echo "检查并安装 Python 依赖..."
+    if ! dpkg -l | grep -q "python3-venv"; then
+        echo "未找到 python3-venv，正在安装..."
+        sudo apt update
+        sudo apt install -y python3-venv
+    fi
+    if [ ! -d "$INSTALL_PATH/.venv" ]; then
+        python3 -m venv "$INSTALL_PATH/.venv"
+    fi
+    source "$INSTALL_PATH/.venv/bin/activate"
+    pip install --upgrade pip
+    pip install docker requests
+    echo "Python 依赖安装完成。"
+}
+
 # 检查 Docker 是否可用
 verify_docker() {
     echo "检查 Docker 是否已安装..."
@@ -61,10 +78,10 @@ configure_env() {
         cp .env.example .env
         sed -i 's/^LAUNCH_DOCKER=.*/LAUNCH_DOCKER=true/' .env
         sed -i 's/^LLM_BACKEND=.*/LLM_BACKEND=ollama/' .env
-        sed -i 's/^LOCAL_DB_URL=.*/LOCAL_DB_URL=postgresql:\/\/postgres:postgres@postgres:5432\/naptha_db/' .env
+        sed -i 's/^LOCAL_DB_URL=.*/LOCAL_DB_URL=postgresql:\/\/postgres:postgres@localhost:5432\/naptha_db/' .env
         # 如果 LOCAL_DB_URL 不存在，则追加
         if ! grep -q "^LOCAL_DB_URL=" .env; then
-            echo "LOCAL_DB_URL=postgresql://postgres:postgres@postgres:5432/naptha_db" >> .env
+            echo "LOCAL_DB_URL=postgresql://postgres:postgres@localhost:5432/naptha_db" >> .env
         fi
         # 设置默认用户
         if ! grep -q "^youruser=" .env; then
@@ -171,6 +188,9 @@ deploy_naptha() {
 
     # 下载 Naptha 代码
     fetch_naptha_code
+
+    # 安装 Python 依赖
+    prepare_python_env
 
     # 设置环境变量
     configure_env
