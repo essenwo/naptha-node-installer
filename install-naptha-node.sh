@@ -1,10 +1,6 @@
 #!/bin/bash
 
 # Naptha 节点一键部署脚本
-# 功能：安装 Docker，克隆 Naptha 仓库，配置环境并启动节点
-# 作者：Grok 3 (xAI)
-# 日期：2025-03-05
-
 # Naptha 安装目录
 INSTALL_PATH="$HOME/naptha-node"
 
@@ -50,12 +46,19 @@ verify_docker() {
     echo "Docker 已安装，版本：$(docker --version)"
 }
 
-# 检查 Docker Compose 是否可用
+# 检查并安装 Docker Compose
 verify_compose() {
     echo "检查 Docker Compose 是否可用..."
     if ! docker compose version &> /dev/null; then
-        echo "未找到 Docker Compose，请确保 Docker 版本支持 compose 插件！"
-        exit 1
+        echo "未找到 Docker Compose，正在安装 Docker Compose 插件..."
+        # 安装 Docker Compose 插件
+        sudo apt update
+        sudo apt install -y docker-compose-plugin
+        # 验证安装
+        if ! docker compose version &> /dev/null; then
+            echo "Docker Compose 插件安装失败，请手动安装！"
+            exit 1
+        fi
     fi
     echo "Docker Compose 已准备好，版本：$(docker compose version)"
 }
