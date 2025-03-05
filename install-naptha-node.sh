@@ -55,16 +55,20 @@ setup_naptha_config() {
         cp .env.example .env
     else
         echo "未找到 .env.example 文件，创建默认配置文件..."
-        cat > .env <<EOF
-LAUNCH_DOCKER=true
-LLM_BACKEND=ollama
-youruser=root
-EOF
+        echo "LAUNCH_DOCKER=true" > .env
+        echo "LLM_BACKEND=ollama" >> .env
+        echo "youruser=root" >> .env
     fi
     # 确保必要变量存在
-    sed -i 's/^LAUNCH_DOCKER=.*/LAUNCH_DOCKER=true/' .env 2>/dev/null || echo "LAUNCH_DOCKER=true" >> .env
-    sed -i 's/^LLM_BACKEND=.*/LLM_BACKEND=ollama/' .env 2>/dev/null || echo "LLM_BACKEND=ollama" >> .env
-    sed -i 's/^youruser=.*/youruser=root/' .env 2>/dev/null || echo "youruser=root" >> .env
+    if ! grep -q "^LAUNCH_DOCKER=" .env; then
+        echo "LAUNCH_DOCKER=true" >> .env
+    fi
+    if ! grep -q "^LLM_BACKEND=" .env; then
+        echo "LLM_BACKEND=ollama" >> .env
+    fi
+    if ! grep -q "^youruser=" .env; then
+        echo "youruser=root" >> .env
+    fi
     echo "Naptha 环境变量配置完成。"
 }
 
@@ -77,6 +81,27 @@ start_naptha() {
     else
         echo "未找到 launch.sh 脚本，启动失败！"
         exit 1
+    fi
+}
+
+# 显示私钥
+display_private_key() {
+    echo "正在显示私钥..."
+    USERNAME=$(grep "^youruser=" .env | cut -d'=' -f2)
+    if [ -z "$USERNAME" ]; then
+        echo "未找到用户名，请检查 .env 文件！"
+        return
+    fi
+    PEM_FILE="$NAPTHA_DIR/$USERNAME.pem"
+    if [ -f "$PEM_FILE" ]; then
+        PRIVATE_KEY=$(cat "$PEM_FILE")
+        if [ -n "$PRIVATE_KEY" ]; then
+            echo "你的私钥：$PRIVATE_KEY"
+        else
+            echo "私钥文件为空，请检查节点是否正确启动！"
+        fi
+    else
+        echo "未找到私钥文件 $PEM_FILE，请检查节点是否正确启动！"
     fi
 }
 
@@ -95,6 +120,7 @@ deploy_naptha_node() {
     configure_python_env
     setup_naptha_config
     start_naptha
+    display_private_key
     view_naptha_logs
 }
 
